@@ -35,3 +35,15 @@ With these optimizations, all three services started successfully and run concur
 - `/v1/` (CPU) -> http://localhost:7873/v1/
 - `/v2/` (GPU 1) -> http://localhost:7873/v2/
 - `/v2-bao/` (CPU) -> http://localhost:7873/v2-bao/
+
+## Long-Term GPU Management Dashboard
+To prevent and resolve future VRAM bottlenecks interactively, an administrative dashboard was added:
+1. **Endpoint**: Access is routed via Nginx at `http://localhost:7873/gpu`.
+2. **Access Control**: Protected by secure HTTP POST authentication (using a cookie-based session token valid for 24 hours).
+   - **Credentials**: Configured in `.env` as `ADMIN_USER=admin` and `ADMIN_PASS=demo`.
+   - **Security**: The docker-compose environment block does *not* contain the credentials to avoid raw credential exposure in the docker configuration (`docker inspect`). They are instead loaded dynamically at runtime by reading `.env` directly inside the container.
+3. **Core Functionalities**:
+   - **GPU Monitoring**: Real-time inspection of CUDA indexes, VRAM allocation, usage percentages, and GPU process trees.
+   - **Active GPU Allocation**: Dynamically switch the main core service (`deepseek-ocr-2-demo`) between GPU 0 and GPU 1. This updates the `.env` settings and automatically recreates the core container via Docker Compose to apply the new assignments.
+   - **Service Controls**: Individually Start, Stop, and Restart any of the three DeepSeek OCR containers directly from the UI.
+   - **Process Terminations (Kill)**: Interactively terminate active host GPU processes by PID (to free up VRAM from orphaned or bloated processes), while preventing terminations of critical system processes (e.g. `rustdesk`, `nginx`, `xorg`).

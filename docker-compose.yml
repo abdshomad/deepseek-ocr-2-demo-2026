@@ -36,6 +36,7 @@ services:
       - deepseek-ocr-2-demo
       - deepseek-ocr-2-demo-bao
       - deepseek-ocr-demo
+      - admin-panel
     restart: unless-stopped
 
   deepseek-ocr-2-demo:
@@ -48,7 +49,7 @@ services:
               count: all
               capabilities: [gpu]
     environment:
-      - CUDA_VISIBLE_DEVICES=1
+      - CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-1}
       - GRADIO_SERVER_PORT=7860
       - GRADIO_ROOT_PATH=/v2
       - GRADIO_SERVER_NAME=0.0.0.0
@@ -80,3 +81,21 @@ services:
       - ${HOME}/.cache/huggingface:/root/.cache/huggingface
       - ./DeepSeek-OCR-Demo:/app
     command: *cpu-command
+
+  admin-panel:
+    <<: *base-service
+    environment:
+      - PIPELINE_HOST=0.0.0.0
+      - PIPELINE_PORT=8000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./:/workspace
+    pid: "host"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    command: python3 /workspace/scripts/admin_panel.py

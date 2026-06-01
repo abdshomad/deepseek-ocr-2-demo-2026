@@ -241,6 +241,14 @@
             --icon-color: var(--accent-purple);
         }
 
+        .card-gpu {
+            --border-hover-color: rgba(244, 63, 94, 0.5);
+            --shadow-glow: 0 0 30px rgba(244, 63, 94, 0.2);
+            --icon-bg: rgba(244, 63, 94, 0.1);
+            --icon-border: rgba(244, 63, 94, 0.25);
+            --icon-color: #f43f5e;
+        }
+
         footer {
             margin-top: 80px;
             color: rgba(255, 255, 255, 0.2);
@@ -309,6 +317,23 @@
                 </div>
                 <div class="card-footer">
                     Launch Demo <span>&rarr;</span>
+                </div>
+            </a>
+
+            <!-- GPU Control Dashboard -->
+            <a href="/gpu" class="card card-gpu">
+                <div>
+                    <div class="card-header">
+                        <div class="icon-box">⚙️</div>
+                        <span class="version-tag">Admin Panel</span>
+                    </div>
+                    <div class="card-body">
+                        <h3>GPU Control Panel</h3>
+                        <p>Secure system monitor to track active VRAM allocations, inspect CUDA workloads, terminate GPU processes, and configure container runtimes.</p>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    Manage Resources <span>&rarr;</span>
                 </div>
             </a>
         </main>
