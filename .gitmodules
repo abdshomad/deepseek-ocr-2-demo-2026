@@ -1,0 +1,12 @@
+[submodule "paddle-ocr-1-6-demo"]
+	path = paddle-ocr-1-6-demo
+	url = https://github.com/abdshomad/paddle-ocr-1-6-demo.git
+[submodule "DeepSeek-OCR-Demo"]
+	path = DeepSeek-OCR-Demo
+	url = https://huggingface.co/spaces/merterbak/DeepSeek-OCR-Demo
+[submodule "DeepSeek-OCR-2-Demo"]
+	path = DeepSeek-OCR-2-Demo
+	url = https://huggingface.co/spaces/prithivMLmods/DeepSeek-OCR-2-Demo
+[submodule "DeepSeek-OCR-2-Demo-bao"]
+	path = DeepSeek-OCR-2-Demo-bao
+	url = https://huggingface.co/spaces/baohuynhbk14/DeepSeek-OCR-2-DEMO

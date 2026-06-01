@@ -1,0 +1,82 @@
+x-templates:
+  base-service: &base-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /app
+    restart: unless-stopped
+
+  cpu-command: &cpu-command >
+    python3 -c "import gradio as gr;
+    orig_tb = gr.Textbox.__init__;
+    gr.Textbox.__init__ = lambda self, *args, **kwargs: (kwargs.pop('show_copy_button', None), orig_tb(self, *args, **kwargs))[1];
+    import sys, types, torch, transformers;
+    mock_spaces = types.ModuleType('spaces');
+    mock_spaces.GPU = lambda *args, **kwargs: (lambda f: f);
+    sys.modules['spaces'] = mock_spaces;
+    torch.cuda.is_available = lambda: False;
+    torch.Tensor.cuda = lambda self, *args, **kwargs: self;
+    torch.nn.Module.cuda = lambda self, *args, **kwargs: self;
+    orig_to = torch.nn.Module.to;
+    torch.nn.Module.to = lambda self, *args, **kwargs: orig_to(self, *[('cpu' if (isinstance(a, str) and 'cuda' in a) else a) for a in args], **{k: ('cpu' if (isinstance(v, str) and 'cuda' in v) else v) for k, v in kwargs.items()});
+    orig_fp = transformers.AutoModel.from_pretrained;
+    transformers.AutoModel.from_pretrained = lambda *args, **kwargs: orig_fp(*args, **dict(kwargs, _attn_implementation='eager', torch_dtype=torch.bfloat16));
+    import runpy;
+    runpy.run_path('app.py', run_name='__main__')"
+
+services:
+  nginx:
+    image: nginx:alpine
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./portal:/usr/share/nginx/html:ro
+    ports:
+      - "${PORT:-7873}:80"
+    depends_on:
+      - deepseek-ocr-2-demo
+      - deepseek-ocr-2-demo-bao
+      - deepseek-ocr-demo
+    restart: unless-stopped
+
+  deepseek-ocr-2-demo:
+    <<: *base-service
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      - CUDA_VISIBLE_DEVICES=1
+      - GRADIO_SERVER_PORT=7860
+      - GRADIO_ROOT_PATH=/v2
+      - GRADIO_SERVER_NAME=0.0.0.0
+    volumes:
+      - ${HOME}/.cache/huggingface:/root/.cache/huggingface
+      - ./DeepSeek-OCR-2-Demo:/app
+    command: python3 deepseek_ocr_v2_demo.py
+
+  deepseek-ocr-2-demo-bao:
+    <<: *base-service
+    environment:
+      - CUDA_VISIBLE_DEVICES=""
+      - GRADIO_SERVER_PORT=7861
+      - GRADIO_ROOT_PATH=/v2-bao
+      - GRADIO_SERVER_NAME=0.0.0.0
+    volumes:
+      - ${HOME}/.cache/huggingface:/root/.cache/huggingface
+      - ./DeepSeek-OCR-2-Demo-bao:/app
+    command: *cpu-command
+
+  deepseek-ocr-demo:
+    <<: *base-service
+    environment:
+      - CUDA_VISIBLE_DEVICES=""
+      - GRADIO_SERVER_PORT=7862
+      - GRADIO_ROOT_PATH=/v1
+      - GRADIO_SERVER_NAME=0.0.0.0
+    volumes:
+      - ${HOME}/.cache/huggingface:/root/.cache/huggingface
+      - ./DeepSeek-OCR-Demo:/app
+    command: *cpu-command
