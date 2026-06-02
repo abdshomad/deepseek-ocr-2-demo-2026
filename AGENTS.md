@@ -31,6 +31,14 @@ See [docs/design.md](docs/design.md) for rationale and examples.
 - File naming convention: `{2-digits-number}-{slug}.md` (e.g., `01-base64-image-display.md`).
 - Document the issue clearly, describing the symptoms/errors, the root cause, and the implemented solution.
 
+## App Testing Policy (Mandatory)
+
+When a user intentionally asks to test the app:
+- Use browser tools to test the app.
+- Take a screenshot for each sample image, each step, and each variant/option until the OCR result appears.
+- Save screenshots in the `/screenshots/` folder.
+- Use the file naming convention: `{2-digit-numberss}-{steps#}-{variant/options if any}-{slug}.jpg`.
+
 ## Agent System Tasks
 
 1. **Dependency Integration**: Keep dependencies synchronized using `uv`. Never touch submodule source code; integrate via env, Docker, Nginx, and parent-repo config instead.
